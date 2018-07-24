@@ -1,23 +1,23 @@
 object ConsoleIO {
 
-  sealed trait ConsoleIO
+  sealed trait ConsoleIO[A]
 
-  case class WriteLine(line: String, then: () => ConsoleIO) extends ConsoleIO
-  case class ReadLine(then: String => ConsoleIO) extends ConsoleIO
-  case class End() extends ConsoleIO
+  case class WriteLine[A](line: String, then: () => ConsoleIO[A]) extends ConsoleIO[A]
+  case class ReadLine[A](then: String => ConsoleIO[A]) extends ConsoleIO[A]
+  case class EndWith[A](value: A) extends ConsoleIO[A]
 
-  val helloWorld: ConsoleIO = WriteLine("HelloWorld!", ()=>End())
+  val helloWorld: ConsoleIO[Int] = WriteLine("HelloWorld!", ()=>EndWith(3))
 
-  val userNameProgram: ConsoleIO = WriteLine (
+  val userNameProgram: ConsoleIO[String] = WriteLine (
     "Hello, what is your name?", () =>
     ReadLine(name =>
-        WriteLine("Hello, " + name + "!", () => End())
+        WriteLine("Hello, " + name + "!", () => EndWith(name))
         )
     )
 
-  def interpret(program: ConsoleIO): Unit = program match {
+  def interpret[A](program: ConsoleIO[A]): A = program match {
     case WriteLine(line, then) => println(line); interpret(then())
     case ReadLine(then)        => interpret(then(readLine()))
-    case End()                 => ()
+    case EndWith(value)        => value
   }
 }
