@@ -43,4 +43,10 @@ object Sequential {
     extends Sequential[F, A]
   case class Map[F[_], A0, A](v: Sequential[F, A0], f: A0 => A)
     extends Sequential[F, A]
+
+  sealed trait ConsoleF[A]
+  case class WriteLine(line: String) extends ConsoleF[Unit]
+  case class  ReadLine() extends ConsoleF[String]
+
+  type ConsoleIO[A] = Sequential[ConsoleF, A]
 }
